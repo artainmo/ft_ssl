@@ -1,6 +1,9 @@
 NAME = ft_ssl
 
-SRC = ft_ssl.c
+SRC = ft_ssl.c \
+			src/parsing.c \
+			utils/get_next_line/get_next_line.c \
+			utils/get_next_line/get_next_line_utils.c
 OBJ = $(SRC:.c=.o)
 
 LIBFLAGS = -I . -L . -I ./utils/libft -L ./utils/libft -I ./utils/get_next_line -I ./utils/ft_printf -L ./utils/ft_printf

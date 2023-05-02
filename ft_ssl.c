@@ -1,7 +1,19 @@
 #include "ft_ssl.h"
 
+void init_struct(t_args *args)
+{
+	args->algo = 0;
+	args->p = 0;
+	args->q = 0;
+	args->r = 0;
+	args->s = 0;
+	args->inputs = NULL;
+}
+
 int main(int argc, char **argv)
 {
+	t_args args;
+
 	if (argc < 2)
 	{
 		ft_printf("usage: ft_ssl command [flags] [file/string]\n");
@@ -17,5 +29,9 @@ int main(int argc, char **argv)
 		ft_printf("-p -q -r -s\n");
 		exit(0);
 	}
+	init_struct(&args);
+	parsing(&args, argc, argv);
+	visualize_args(&args);
+	double_str_free(args.inputs);
 	return 0;
 }
