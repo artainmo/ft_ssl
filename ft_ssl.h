@@ -17,5 +17,7 @@ typedef struct s_arguments
 
 void parsing(t_args *args, int argc, char **argv);
 void visualize_args(t_args *args);
+void md5(t_args *args);
+void sha256(t_args *args);
 
 #endif

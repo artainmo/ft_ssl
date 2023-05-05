@@ -2,6 +2,8 @@ NAME = ft_ssl
 
 SRC = ft_ssl.c \
 			src/parsing.c \
+			src/md5.c \
+			src/sha256.c \
 			utils/get_next_line/get_next_line.c \
 			utils/get_next_line/get_next_line_utils.c
 OBJ = $(SRC:.c=.o)

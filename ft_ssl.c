@@ -31,7 +31,11 @@ int main(int argc, char **argv)
 	}
 	init_struct(&args);
 	parsing(&args, argc, argv);
-	visualize_args(&args);
+	// visualize_args(&args);
+	if (args.algo == 5)
+		md5(&args);
+	else
+		sha256(&args);
 	double_str_free(args.inputs);
 	return 0;
 }
