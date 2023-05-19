@@ -5,4 +5,6 @@ In C, while only being allowed a limited amount of functions, I wrote the MD5 an
 
 ## Documentation
 [artainmo - cybersecurity - cryptography](https://github.com/artainmo/cybersecurity#Cryptography)<br>
-[Message-Digest Algorithm 5: Overview and How Does it Work?](https://www.simplilearn.com/tutorials/cyber-security-tutorial/md5-algorithm)
+[Message-Digest Algorithm 5: Overview and How Does it Work?](https://www.simplilearn.com/tutorials/cyber-security-tutorial/md5-algorithm)<br>
+[The MD5 algorithm (with examples)](https://www.comparitech.com/blog/information-security/md5-algorithm-with-examples/#How_does_the_MD5_algorithm_work)<br>
+[The MD5 Message-Digest Algorithm](https://datatracker.ietf.org/doc/html/rfc1321)
