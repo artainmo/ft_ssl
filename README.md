@@ -4,5 +4,5 @@
 In C, while only being allowed a limited amount of functions, I wrote the MD5 and SHA-256 hashing algorithms with different flag options from the OpenSSL library.
 
 ## Documentation
-[artainmo - cybersecurity - cryptography](https://github.com/artainmo/cybersecurity#Cryptography)
+[artainmo - cybersecurity - cryptography](https://github.com/artainmo/cybersecurity#Cryptography)<br>
 [Message-Digest Algorithm 5: Overview and How Does it Work?](https://www.simplilearn.com/tutorials/cyber-security-tutorial/md5-algorithm)
