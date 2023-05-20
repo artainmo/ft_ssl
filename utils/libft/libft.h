@@ -78,8 +78,7 @@ int				ft_strcmp(const char *s1, const char *s2);
 char			*ft_last_decf(char *str);
 char			*ft_ftoa(double f, int precision);
 int				ft_count_b_zeros(char *str);
-
-char			*ft_dec_to_hexa(unsigned long s);
+char			*ft_dec_to_hex(unsigned long s);
 int				ft_abs(int a);
 double			ft_atof(char *s);
 void			double_str_free(char **str);
@@ -87,6 +86,8 @@ int				ft_strrchr_m(char *s, int c);
 int				ft_count_words(char **double_str);
 void			ft_printf_ds(char **str);
 char			*ft_strjoin_f(char *s1, char const *s2);
+char			*ft_strjoin_df(char *s1, char *s2);
+char			*ft_strjoin_2f(char *s1, char *s2);
 int				ft_file_trim(char *filename, char trim);
 int				ft_file_rep(char *filename, char trim, char replace);
 int				ft_filebordertrim(char *filename, char *trim);
@@ -95,5 +96,6 @@ void			ft_errno(void);
 void			ft_malloc_error(void);
 char			*ft_cut_f(char *str, int len);
 char			**add_end_ds(char **ds, char *add);
+int 			ft_round_up(float x);
 
 #endif
