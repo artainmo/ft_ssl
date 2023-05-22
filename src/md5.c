@@ -59,11 +59,102 @@ const int g_S[4][16] = {
       6, 10, 15, 21}
     };
 
+// static void printstringasbinary(char *s, int length)
+// {
+//   printf("%s\n", s);
+//   for (int l = 0; l < length; l++)
+//   {
+//     for(int i = 7; i >= 0; i--) {
+//         ft_printf("%d", (s[l] >> i) & 1 ? 1 : 0 );
+//     }
+//     ft_printf(" ");
+//   }
+//   ft_printf("\n");
+// }
+
+static int binaryStringToInt(const char* binaryString) {
+    int result = 0;
+    int len = ft_strlen(binaryString);
+
+    for (int i = 0; i < len; i++) {
+        result <<= 1;  // Left shift result by 1 bit
+        result += binaryString[i] - '0';  // Convert character to integer
+    }
+    return result;
+}
+
+static char *stringToBinary(char *s, int length)
+{
+  char *res;
+  int counter = 0;
+
+  if (!(res = malloc((length * 8) + 1)))
+    ft_malloc_error();
+  for (int l = 0; l < length; l++)
+  {
+    for(int i = 7; i >= 0; i--) {
+      res[counter++] = (s[l] >> i) & 1 ? '1' : '0';
+    }
+  }
+  return res;
+}
+
+// static void printBinaryString(char *s, int length)
+// {
+//   int i = 0;
+//
+//   while (i < length)
+//   {
+//     ft_printf("%c", s[i++]);
+//     if (i % 4 == 0) {
+//       write(1, " ", 1);
+//     }
+//   }
+//   write(1, "\n", 1);
+// }
+
+static char *leftShift(char *binaryString, int shift)
+{
+  char *begin;
+  char *end;
+  char *ret;
+  int len = ft_strlen(binaryString);
+
+  if (shift > len)
+    ft_error("Left shift not possible");
+  if (!(begin = ft_substr(binaryString, 0, shift)))
+    ft_malloc_error();
+  if (!(end = ft_substr(binaryString, shift, len - shift)))
+    ft_malloc_error();
+  if (!(ret = ft_strjoin_len_f(end, len - shift, begin, shift, 3)))
+    ft_malloc_error();
+  return ret;
+}
+
+static char *decimalToBinary(int num) {
+  char *res;
+  int i = 32;
+
+  if (num == 0) {
+    return 0;
+  }
+  if (!(res = malloc(32 + 1)))
+      ft_malloc_error();
+  res[i--] = 0;
+  while (i >= 0) {
+    res[i--] = num % 2 ? '1': '0';
+    num /= 2;
+  }
+  return res;
+}
+
 static void operation(int M, int round_, int operation_)
 {
   int Y = 0;
   int rem_B = g_B;
   int rem_C = g_C;
+  char *b;
+  char *blf;
 
   if (round_ == 0) { Y = F(g_B, g_C, g_D); }
   else if (round_ == 1) { Y = G(g_B, g_C, g_D); }
@@ -73,11 +164,18 @@ static void operation(int M, int round_, int operation_)
   Y = modular_addition(g_A, Y);
   Y = modular_addition(M, Y);
   Y = modular_addition(g_K[round_][operation_], Y);
-  Y = Y << g_S[round_][operation_];
+  b = decimalToBinary(Y);
+  blf = leftShift(b, g_S[round_][operation_]);
+  Y = binaryStringToInt(blf);
+  free(b);
+  free(blf);
   g_B = modular_addition(g_B, Y);
   g_A = g_D;
   g_C = rem_B;
   g_D = rem_C;
+  ft_printf("Round: %d | Operation: %d\n", round_, operation_);
+  ft_printf("A: %08x | B: %08x | C: %08x | D: %08x\n", g_A, g_B, g_C, g_D);
+  // exit(0);
 }
 
 static void freeBlocks(int **M, int _512bit_messages)
@@ -92,6 +190,7 @@ static int **toBlocks(char *message, int _512bit_messages)
 {
   int **M;
   char *rem = message;
+  char *tmp;
 
   if (!(M = malloc(_512bit_messages)))
     ft_malloc_error();
@@ -99,7 +198,11 @@ static int **toBlocks(char *message, int _512bit_messages)
     if (!(M[i] = malloc(sizeof(int) * 16)))
       ft_malloc_error();
     for (int l = 0; l < 16 ; l++) { //Each 512bit message should be split in 16 32bit-words
-      M[i][l] = *(int*)message++; //We cast to int because an int contains 32bits
+      tmp = stringToBinary(message, 4);
+      M[i][l] = binaryStringToInt(tmp);
+      free(tmp);
+      message = message + 4; //One int equals 4 chars thus we move 4 chars forward to go to next int
+      // ft_printf("M[%d][%d]: %08x\n", i, l, M[i][l]);
     }
   }
   free(rem);
@@ -119,37 +222,52 @@ static char *padding(int padding_bits, char value)
   return res;
 }
 
+static char *reverse_bits_padding(char *s)
+{
+  char *active;
+  int ia = 0;
+  char *empty;
+  int ie = 0;
+
+  if (!(active = malloc(sizeof(uint64_t))))
+    ft_malloc_error();
+  if (!(empty = malloc(sizeof(uint64_t))))
+    ft_malloc_error();
+  for (int i = 0; i < 64/8; i++) {
+    if (s[i] != 0) {
+      active[ia++] = s[i];
+    } else {
+      empty[ie++] = s[i];
+    }
+  }
+  return ft_strjoin_len_f(empty, ie, active, ia, 3);
+}
+
 static void md5_transform(char *input)
 {
   char *res;
-  uint64_t input_bits_64;
-  char *input_length_64bits;
+  uint64_t *input_length_64bits;
+  void *pointer;
   int **M;
 
-  //step 1: append padding bits
-  int input_bits = ft_strlen(input) * 8; //One char equals 1 byte which equals 8 bits
+//step 1: append padding bits
+  uint64_t input_bits = ft_strlen(input) * 8; //One char equals 1 byte which equals 8 bits
   int _512bit_messages = ft_round_up(((float)input_bits / (512 - 64)));
   int padding_bits = ((512 * _512bit_messages) - 64) - input_bits; //Total length to be 64 bits less than multiple of 512
-  ft_printf("input_bits: %d\n_512bit_messages: %d\npadding_bits: %d\n", input_bits, _512bit_messages, padding_bits);
+  // ft_printf("input_bits: %d\n_512bit_messages: %d\npadding_bits: %d\n", input_bits, _512bit_messages, padding_bits);
   if (padding_bits == 0)
     padding_bits = 512;
-  res = ft_strjoin_2f(input, padding(8, 0b10000000)); //First byte should equal '10000000'. We use 0b as prefix to represent binary literals in c
-  res = ft_strjoin_df(res, padding(padding_bits - 8, 0b00000000)); //Rest of bytes should equal '00000000'
-  //step 2: append length
-  if (!(input_length_64bits = malloc(64 / 8 + 1)))
+  res = ft_strjoin_len_f(input, input_bits/8, padding(8, 0b10000000), 1, 2); //First byte should equal '10000000'. We use 0b as prefix to represent binary literals in c
+  res = ft_strjoin_len_f(res, input_bits/8 + 1, padding(padding_bits - 8, 0b00000000), (padding_bits - 8) / 8, 3); //Rest of bytes should equal '00000000'
+//step 2: append length
+  if (!(input_length_64bits = malloc(sizeof(uint64_t))))
     ft_malloc_error();
-  input_bits_64 = (uint64_t)input_bits;
-  input_length_64bits[0] = (char)input_bits_64++;
-  input_length_64bits[1] = (char)input_bits_64++;
-  input_length_64bits[2] = (char)input_bits_64++;
-  input_length_64bits[3] = (char)input_bits_64++;
-  input_length_64bits[4] = (char)input_bits_64++;
-  input_length_64bits[5] = (char)input_bits_64++;
-  input_length_64bits[6] = (char)input_bits_64++;
-  input_length_64bits[7] = (char)input_bits_64++;
-  input_length_64bits[8] = '\0';
-  res = ft_strjoin_df(res, input_length_64bits);
-  //step 3: process each 512-bit block
+  *input_length_64bits = (uint64_t)input_bits;
+  pointer = input_length_64bits;
+  res = ft_strjoin_len_f(res, 448/8, reverse_bits_padding(pointer), 64/8, 3);
+  // printstringasbinary(res, 512/8);
+  // exit(0);
+//step 3: process each 512-bit block
   M = toBlocks(res, _512bit_messages);
   for (int block = 0; block < _512bit_messages; block++) {
     for (int round_ = 0; round_ < 4; round_++) {
@@ -161,9 +279,10 @@ static void md5_transform(char *input)
     g_B = modular_addition(g_B, g_OI_B);
     g_C = modular_addition(g_C, g_OI_C);
     g_D = modular_addition(g_D, g_OI_D);
+    ft_printf("Final Addition\n");
+    ft_printf("A: %08x | B: %08x | C: %08x | D: %08x\n", g_A, g_B, g_C, g_D);
   }
-  ft_printf("%s%s%s%s\n", ft_dec_to_hex(g_A), ft_dec_to_hex(g_B),
-        ft_dec_to_hex(g_C), ft_dec_to_hex(g_D));
+  ft_printf("%08x%08x%08x%08x\n", g_A, g_B, g_C, g_D);
   freeBlocks(M, _512bit_messages);
 }
 

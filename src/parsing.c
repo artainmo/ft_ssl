@@ -33,9 +33,8 @@ static char *file_content(char *file)
 		{
 			if (ret == -1)
 				ft_errno();
-			if (!(result = ft_strjoin_f(result, line)))
+			if (!(result = ft_strjoin_f(result, line, 3)))
 				ft_malloc_error();
-			free(line);
 		}
 		close(fd);
 	}
@@ -54,6 +53,7 @@ static void take_piped_stdin_input(t_args *args)
       ft_errno();
     if (!(args->inputs = add_end_ds(args->inputs, line)))
       ft_malloc_error();
+    free(line);
   }
 }
 
