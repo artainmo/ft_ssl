@@ -35,6 +35,8 @@ static char *file_content(char *file)
 				ft_errno();
 			if (!(result = ft_strjoin_f(result, line, 3)))
 				ft_malloc_error();
+      if (!(result = ft_strjoin_f(result, "\n", 1))) //When comparing with functional algorithm, a \n exists at end of input, knowing the get_next_line I use removes the \n, I added it back.
+        ft_malloc_error();
 		}
 		close(fd);
 	}
