@@ -1,10 +1,10 @@
 #include "../ft_ssl.h"
 
 //init 32bits initialization vectors
-const uint32_t g_OI_A = 0x01234567; //OI stands for original initialization vector ...A/B/C/D
-const uint32_t g_OI_B = 0x89abcdef;
-const uint32_t g_OI_C = 0xfedcba98;
-const uint32_t g_OI_D = 0x76543210;
+const uint32_t g_OI_A = 0x67452301; //OI stands for original initialization vector ...A/B/C/D
+const uint32_t g_OI_B = 0xEFCDAB89;
+const uint32_t g_OI_C = 0x98BADCFE;
+const uint32_t g_OI_D = 0x10325476;
 uint32_t g_A;
 uint32_t g_B;
 uint32_t g_C;
@@ -27,10 +27,10 @@ const uint32_t g_K[4][16] = {
     };
 
 //4 functions for the 4 rounds
-static uint32_t F(uint32_t X, uint32_t Y, uint32_t Z) { return (X & Y) | (~X & Z); }
-static uint32_t G(uint32_t X, uint32_t Y, uint32_t Z) { return (X & Z) | (Y & ~Z); }
+static uint32_t F(uint32_t X, uint32_t Y, uint32_t Z) { return (X & Y) | ((~X) & Z); }
+static uint32_t G(uint32_t X, uint32_t Y, uint32_t Z) { return (Z & X) | ((~Z) & Y); }
 static uint32_t H(uint32_t X, uint32_t Y, uint32_t Z) { return X ^ Y ^ Z; }
-static uint32_t I(uint32_t X, uint32_t Y, uint32_t Z) { return Y ^ (X | ~Z); }
+static uint32_t I(uint32_t X, uint32_t Y, uint32_t Z) { return Y ^ (X | (~Z)); }
 
 //Modular addition
 const unsigned long g_Z = 0x100000000;
@@ -118,7 +118,7 @@ static uint32_t rotate_left(uint32_t x, uint32_t n) { return (x << n) | (x >> (3
 //     ft_malloc_error();
 //   return ret;
 // }
-//
+
 static char *decimalToBinary(uint32_t num) {
   char *res;
   int i = 32;
@@ -151,12 +151,7 @@ static void operation(uint32_t M, int round_, int operation_)
   else { ft_error("Out of range round number"); }
   ft_printf("_____________________\n");
   ft_printf("Round: %d | Operation: %d\n", round_, operation_);
-  ft_printf("B: %08x | ", g_B);
-  ft_printf("A: %08x | ", g_A);
-  ft_printf("E: %08x | ", Y);
-  ft_printf("K: %08x | ", g_K[round_][operation_]);
-  ft_printf("M: %08x | ", M);
-  ft_printf("S: %d\n", g_S[round_][operation_]);
+  ft_printf("B: %08x | A: %08x | E: %08x | K: %08x | M: %08x | S: %d\n", g_B, g_A, Y, g_K[round_][operation_], M, g_S[round_][operation_]);
   Y = modular_addition(g_A, Y);
   // ft_printf("Y1: %08x\n", Y);
   Y = modular_addition(M, Y);
@@ -181,6 +176,40 @@ static void operation(uint32_t M, int round_, int operation_)
   // if (operation_ == 6) { exit(0); }
 }
 
+static char *reorder4Bytes_little_endian(char *s) //Little and big endian are two ways of storing multibyte data-types ( int, float, etc). In little endian machines, last byte of binary representation of the multibyte data-type is stored first. (https://www.geeksforgeeks.org/little-and-big-endian-mystery/)
+{
+  char *firstByte;
+  char *secondByte;
+  char *thirdByte;
+  char *fourthByte;
+  char *res;
+
+  if (!(firstByte = ft_substr(s, 0, 8)))
+    ft_malloc_error();
+  if (!(secondByte = ft_substr(s, 8, 8)))
+    ft_malloc_error();
+  if (!(thirdByte = ft_substr(s, 16, 8)))
+    ft_malloc_error();
+  if (!(fourthByte = ft_substr(s, 24, 8)))
+    ft_malloc_error();
+  free(s);
+  res = ft_strjoin_f(fourthByte, thirdByte, 3);
+  res = ft_strjoin_f(res, secondByte, 3);
+  return ft_strjoin_f(res, firstByte, 3);
+}
+
+static uint32_t reorder4Bytes_little_endian2(uint32_t num)
+{
+  char *tmp;
+  uint32_t res;
+
+  tmp = decimalToBinary(num);
+  tmp = reorder4Bytes_little_endian(tmp);
+  res = binaryStringToInt(tmp);
+  free(tmp);
+  return res;
+}
+
 static void freeBlocks(uint32_t **M, int _512bit_messages)
 {
   for (int i = 0; i < _512bit_messages; i++) {
@@ -188,40 +217,6 @@ static void freeBlocks(uint32_t **M, int _512bit_messages)
   }
   free(M);
 }
-
-// static char *reorder4Bytes_little_endian(char *s) //Little and big endian are two ways of storing multibyte data-types ( int, float, etc). In little endian machines, last byte of binary representation of the multibyte data-type is stored first. (https://www.geeksforgeeks.org/little-and-big-endian-mystery/)
-// {
-//   char *firstByte;
-//   char *secondByte;
-//   char *thirdByte;
-//   char *fourthByte;
-//   char *res;
-//
-//   if (!(firstByte = ft_substr(s, 0, 8)))
-//     ft_malloc_error();
-//   if (!(secondByte = ft_substr(s, 8, 8)))
-//     ft_malloc_error();
-//   if (!(thirdByte = ft_substr(s, 16, 8)))
-//     ft_malloc_error();
-//   if (!(fourthByte = ft_substr(s, 24, 8)))
-//     ft_malloc_error();
-//   free(s);
-//   res = ft_strjoin_f(fourthByte, thirdByte, 3);
-//   res = ft_strjoin_f(res, secondByte, 3);
-//   return ft_strjoin_f(res, firstByte, 3);
-// }
-//
-// static uint32_t reorder4Bytes_little_endian2(uint32_t num)
-// {
-//   char *tmp;
-//   uint32_t res;
-//
-//   tmp = decimalToBinary(num);
-//   tmp = reorder4Bytes_little_endian(tmp);
-//   res = binaryStringToInt(tmp);
-//   free(tmp);
-//   return res;
-// }
 
 static uint32_t **toBlocks(char *message, int _512bit_messages)
 {
@@ -237,12 +232,12 @@ static uint32_t **toBlocks(char *message, int _512bit_messages)
     for (int l = 0; l < 16 ; l++) { //Each 512bit message should be split in 16 32bit-words
         tmp = stringToBinary(message, 4);
         // printBinaryString(tmp, 32);
-        // tmp = reorder4Bytes_little_endian(tmp); //When comparing my algo with someone else's functional algo, we have the same 4byte/32bits-word content but the bytes are in a different order, they are stored in little-endian order
+        tmp = reorder4Bytes_little_endian(tmp); //When comparing my algo with someone else's functional algo, we have the same 4byte/32bits-word content but the bytes are in a different order, they are stored in little-endian order
         // printBinaryString(tmp, 32);
         M[i][l] = binaryStringToInt(tmp);
         free(tmp);
         message = message + 4; //One int equals 4 chars thus we move 4 chars forward to go to next int
-      ft_printf("M[%d][%d]: %08x\n", i, l, M[i][l]);
+        ft_printf("M[%d][%d]: %08x\n", i, l, M[i][l]);
     }
   }
   free(rem);
@@ -293,6 +288,7 @@ static void md5_transform(char *input)
 
 //step 1: append padding bits
   uint64_t input_bits = ft_strlen(input) * 8; //One char equals 1 byte which equals 8 bits
+  printf("len: %llu | bits: %llu\n", input_bits / 8, input_bits);
   int _512bit_messages = ft_round_up(((float)input_bits / (512 - 64)));
   int padding_bits = ((512 * _512bit_messages) - 64) - input_bits; //Total length to be 64 bits less than multiple of 512
   // ft_printf("input_bits: %d\n_512bit_messages: %d\npadding_bits: %d\n", input_bits, _512bit_messages, padding_bits);
@@ -327,10 +323,10 @@ static void md5_transform(char *input)
     g_D = modular_addition(g_D, g_OI_D);
     ft_printf("Final Addition\n");
     ft_printf("A: %08x | B: %08x | C: %08x | D: %08x\n", g_A, g_B, g_C, g_D);
-    // g_A = reorder4Bytes_little_endian2(g_A);
-    // g_B = reorder4Bytes_little_endian2(g_B);
-    // g_C = reorder4Bytes_little_endian2(g_C);
-    // g_D = reorder4Bytes_little_endian2(g_D);
+    g_A = reorder4Bytes_little_endian2(g_A);
+    g_B = reorder4Bytes_little_endian2(g_B);
+    g_C = reorder4Bytes_little_endian2(g_C);
+    g_D = reorder4Bytes_little_endian2(g_D);
   }
   ft_printf("%08x%08x%08x%08x\n", g_A, g_B, g_C, g_D);
   freeBlocks(M, _512bit_messages);

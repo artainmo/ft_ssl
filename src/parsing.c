@@ -51,6 +51,8 @@ static void take_piped_stdin_input(t_args *args)
   {
     if (get_next_line(0, &line) == -1)
       ft_errno();
+    if (!(line = ft_strjoin_f(line, "\n", 1))) //When comparing with functional algorithm, a \n exists at end of piped input, knowing the get_next_line I use removes the \n, I added it back.
+      ft_malloc_error();
     if (!(args->inputs = add_end_ds(args->inputs, line)))
       ft_malloc_error();
     free(line);
