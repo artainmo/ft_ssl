@@ -1,29 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_double_str_free.c                               :+:      :+:    :+:   */
+/*   ft_count_words.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: artainmo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/02/17 14:58:11 by artainmo          #+#    #+#             */
-/*   Updated: 2020/02/17 15:00:43 by artainmo         ###   ########.fr       */
+/*   Created: 2020/02/23 18:06:13 by artainmo          #+#    #+#             */
+/*   Updated: 2020/02/23 18:08:19 by artainmo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	double_str_free(char **str)
+int	ft_len_ds(char **double_str)
 {
 	int	i;
 
 	i = 0;
-	if (str)
-	{
-		while (str[i])
-		{
-			free(str[i]);
-			i++;
-		}
-	}
-	free(str);
+	if (!double_str)
+		return (0);
+	while (double_str[i])
+		i++;
+	return (i);
 }

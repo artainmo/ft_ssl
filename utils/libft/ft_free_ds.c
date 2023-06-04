@@ -1,25 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printf_ds.c                                     :+:      :+:    :+:   */
+/*   ft_double_str_free.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: artainmo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/03/12 10:37:42 by artainmo          #+#    #+#             */
-/*   Updated: 2021/03/12 10:37:42 by artainmo         ###   ########.fr       */
+/*   Created: 2020/02/17 14:58:11 by artainmo          #+#    #+#             */
+/*   Updated: 2020/02/17 15:00:43 by artainmo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	ft_printf_ds(char **str)
+void	free_ds(char **str)
 {
-	int i;
+	int	i;
 
 	i = 0;
-	while (str[i])
+	if (str)
 	{
-		ft_putendl_fd(str[i], 1);
-		i++;
+		while (str[i])
+		{
+			free(str[i]);
+			i++;
+		}
 	}
+	free(str);
 }

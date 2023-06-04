@@ -6,8 +6,12 @@ void init_struct(t_args *args)
 	args->p = 0;
 	args->q = 0;
 	args->r = 0;
-	args->s = 0;
+	args->s_ = 0;
 	args->inputs = NULL;
+	args->s = NULL;
+	args->file = NULL;
+	args->fileName = NULL;
+	args->outputs = NULL;
 }
 
 int main(int argc, char **argv)
@@ -31,11 +35,16 @@ int main(int argc, char **argv)
 	}
 	init_struct(&args);
 	parsing(&args, argc, argv);
-	visualize_args(&args);
+	// visualize_args(&args);
 	if (args.algo == 5)
 		md5(&args);
 	else
 		sha256(&args);
-	double_str_free(args.inputs);
+	display(&args);
+	free_ds(args.inputs);
+	free_ds(args.s);
+	free_ds(args.file);
+	free_ds(args.fileName);
+	free_ds(args.outputs);
 	return 0;
 }

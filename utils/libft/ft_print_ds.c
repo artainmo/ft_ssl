@@ -1,25 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_count_words.c                                   :+:      :+:    :+:   */
+/*   ft_print_ds.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: artainmo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/02/23 18:06:13 by artainmo          #+#    #+#             */
-/*   Updated: 2020/02/23 18:08:19 by artainmo         ###   ########.fr       */
+/*   Created: 2021/03/12 10:37:42 by artainmo          #+#    #+#             */
+/*   Updated: 2021/03/12 10:37:42 by artainmo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_count_words(char **double_str)
+void	ft_print_ds(char **str)
 {
-	int	i;
+	int i;
 
 	i = 0;
-	if (!double_str)
-		return (0);
-	while (double_str[i])
+	while (str[i])
+	{
+		ft_putendl_fd(str[i], 1);
 		i++;
-	return (i);
+	}
 }

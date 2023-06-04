@@ -15,9 +15,22 @@
 /*
 **Converts a decimal(10-base) into a hexadecimal(16-base),
 **and puts the hexadecimal into a string,
-**checks the precision flags and adds 0s in the string accordingly
-**Comes from my ft_printf
+**Prepends with zeros to have a minimal length of 8
+**Initially comes from my ft_printf however modifs have been added
 */
+
+static char *min_len(char *s)
+{
+	int len = ft_strlen(s);
+
+	while (len < 8)
+	{
+		if (!(s = ft_strjoin_f("0", s, 2)))
+			ft_malloc_error();
+		len++;
+	}
+	return s;
+}
 
 static int	ft_count_dec_to_hex(unsigned long i)
 {
@@ -70,11 +83,5 @@ char		*ft_dec_to_hex(unsigned long long int s)
 	}
 	free(temp_rev);
 	hexadecimal[l] = '\0';
-	// if (ft_strlen(hexadecimal) >= 8)
-	// {
-	// 	ret = ft_substr(hexadecimal, 8, ft_strlen(hexadecimal) - 8);
-	// 	free(hexadecimal);
-	// 	return (ret);
-	// }
-	return (hexadecimal);
+	return min_len(hexadecimal);
 }

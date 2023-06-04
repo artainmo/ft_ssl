@@ -5,6 +5,10 @@ const uint32_t g_OI_A = 0x67452301; //OI stands for original initialization vect
 const uint32_t g_OI_B = 0xEFCDAB89;
 const uint32_t g_OI_C = 0x98BADCFE;
 const uint32_t g_OI_D = 0x10325476;
+uint32_t g_BL_A; //BL stands for blocks because those are used in calculations between blocks
+uint32_t g_BL_B;
+uint32_t g_BL_C;
+uint32_t g_BL_D;
 uint32_t g_A;
 uint32_t g_B;
 uint32_t g_C;
@@ -136,7 +140,7 @@ static char *decimalToBinary(uint32_t num) {
   return res;
 }
 
-static void operation(uint32_t M, int round_, int operation_)
+static void operation(uint32_t M, int round_, int operation_)//, int block_)
 {
   uint32_t Y = 0;
   uint32_t rem_B = g_B;
@@ -149,9 +153,9 @@ static void operation(uint32_t M, int round_, int operation_)
   else if (round_ == 2) { Y = H(g_B, g_C, g_D); }
   else if (round_ == 3) { Y = I(g_B, g_C, g_D); }
   else { ft_error("Out of range round number"); }
-  ft_printf("_____________________\n");
-  ft_printf("Round: %d | Operation: %d\n", round_, operation_);
-  ft_printf("B: %08x | A: %08x | E: %08x | K: %08x | M: %08x | S: %d\n", g_B, g_A, Y, g_K[round_][operation_], M, g_S[round_][operation_]);
+  // ft_printf("_____________________\n");
+  // ft_printf("Block: %d | Round: %d | Operation: %d\n", block_, round_, operation_);
+  // ft_printf("B: %08x | A: %08x | E: %08x | K: %08x | M: %08x | S: %d\n", g_B, g_A, Y, g_K[round_][operation_], M, g_S[round_][operation_]);
   Y = modular_addition(g_A, Y);
   // ft_printf("Y1: %08x\n", Y);
   Y = modular_addition(M, Y);
@@ -171,9 +175,10 @@ static void operation(uint32_t M, int round_, int operation_)
   g_A = g_D;
   g_C = rem_B;
   g_D = rem_C;
-  ft_printf("A: %08x | B: %08x | C: %08x | D: %08x\n", g_A, g_B, g_C, g_D);
-  ft_printf("_____________________\n");
+  // ft_printf("A: %08x | B: %08x | C: %08x | D: %08x\n", g_A, g_B, g_C, g_D);
+  // ft_printf("_____________________\n");
   // if (operation_ == 6) { exit(0); }
+  // if (block_ == 2) { exit(0); }
 }
 
 static char *reorder4Bytes_little_endian(char *s) //Little and big endian are two ways of storing multibyte data-types ( int, float, etc). In little endian machines, last byte of binary representation of the multibyte data-type is stored first. (https://www.geeksforgeeks.org/little-and-big-endian-mystery/)
@@ -224,7 +229,7 @@ static uint32_t **toBlocks(char *message, int _512bit_messages)
   char *rem = message;
   char *tmp;
 
-  if (!(M = malloc(_512bit_messages)))
+  if (!(M = malloc(_512bit_messages * sizeof(char *))))
     ft_malloc_error();
   for (int i = 0; i < _512bit_messages; i++) { //Make distinction between the 512bit-messages
     if (!(M[i] = malloc(sizeof(uint32_t) * 16)))
@@ -237,7 +242,7 @@ static uint32_t **toBlocks(char *message, int _512bit_messages)
         M[i][l] = binaryStringToInt(tmp);
         free(tmp);
         message = message + 4; //One int equals 4 chars thus we move 4 chars forward to go to next int
-        ft_printf("M[%d][%d]: %08x\n", i, l, M[i][l]);
+        // ft_printf("M[%d][%d]: %08x\n", i, l, M[i][l]);
     }
   }
   free(rem);
@@ -278,7 +283,7 @@ static char *padding(int padding_bits, char value)
 //   return ft_strjoin_len_f(empty, ie, active, ia, 3);
 // }
 
-static void md5_transform(char *input)
+static char *md5_transform(char *input)
 {
   char *res;
   uint64_t *input_length_64bits;
@@ -288,12 +293,11 @@ static void md5_transform(char *input)
 
 //step 1: append padding bits
   uint64_t input_bits = ft_strlen(input) * 8; //One char equals 1 byte which equals 8 bits
-  printf("len: %llu | bits: %llu\n", input_bits / 8, input_bits);
-  int _512bit_messages = ft_round_up(((float)input_bits / (512 - 64)));
+  // ft_printf("len: %llu | bits: %llu\n", input_bits / 8, input_bits);
+  int _512bit_messages = input_bits / 512;
+  if (input_bits % 512 >= 440) { _512bit_messages += 2; } else { _512bit_messages += 1; } //At least 1 byte of padding and 64 bytes of length appending should be kept in last block, thus if not enough space for those add one block
   int padding_bits = ((512 * _512bit_messages) - 64) - input_bits; //Total length to be 64 bits less than multiple of 512
   // ft_printf("input_bits: %d\n_512bit_messages: %d\npadding_bits: %d\n", input_bits, _512bit_messages, padding_bits);
-  if (padding_bits == 0)
-    padding_bits = 512;
   res = ft_strjoin_len_f(input, input_bits/8, padding(8, 0b10000000), 1, 2); //First byte should equal '10000000'. We use 0b as prefix to represent binary literals in c
   res = ft_strjoin_len_f(res, input_bits/8 + 1, padding(padding_bits - 8, 0b00000000), (padding_bits - 8) / 8, 3); //Rest of bytes should equal '00000000'
 //step 2: append length
@@ -301,7 +305,7 @@ static void md5_transform(char *input)
     ft_malloc_error();
   *input_length_64bits = input_bits;
   pointer = input_length_64bits;
-  res = ft_strjoin_len_f(res, 448/8, pointer, 64/8, 3);
+  res = ft_strjoin_len_f(res, (((512 * _512bit_messages) - 64) / 8), pointer, 64/8, 3);
   // printstringasbinary(res, 512/8);
   // exit(0);
 //step 3: process each 512-bit block
@@ -314,27 +318,32 @@ static void md5_transform(char *input)
         else if (round_ == 2) { M_number = (((32 + operation_) * 3) + 5) % 16; }
         else if (round_ == 3) { M_number = ((48 + operation_) * 7) % 16; }
         else { ft_error("Out of range round number"); }
-        operation(M[block][M_number], round_, operation_);
+        operation(M[block][M_number], round_, operation_);//, block);
       }
     }
-    g_A = modular_addition(g_A, g_OI_A);
-    g_B = modular_addition(g_B, g_OI_B);
-    g_C = modular_addition(g_C, g_OI_C);
-    g_D = modular_addition(g_D, g_OI_D);
-    ft_printf("Final Addition\n");
-    ft_printf("A: %08x | B: %08x | C: %08x | D: %08x\n", g_A, g_B, g_C, g_D);
-    g_A = reorder4Bytes_little_endian2(g_A);
-    g_B = reorder4Bytes_little_endian2(g_B);
-    g_C = reorder4Bytes_little_endian2(g_C);
-    g_D = reorder4Bytes_little_endian2(g_D);
+    g_BL_A = modular_addition(g_A, g_BL_A);
+    g_BL_B = modular_addition(g_B, g_BL_B);
+    g_BL_C = modular_addition(g_C, g_BL_C);
+    g_BL_D = modular_addition(g_D, g_BL_D);
+    g_A = g_BL_A;
+    g_B = g_BL_B;
+    g_C = g_BL_C;
+    g_D = g_BL_D;
   }
-  ft_printf("%08x%08x%08x%08x\n", g_A, g_B, g_C, g_D);
+  g_A = reorder4Bytes_little_endian2(g_A);
+  g_B = reorder4Bytes_little_endian2(g_B);
+  g_C = reorder4Bytes_little_endian2(g_C);
+  g_D = reorder4Bytes_little_endian2(g_D);
   freeBlocks(M, _512bit_messages);
+  // ft_printf("%08x%08x%08x%08x\n", g_A, g_B, g_C, g_D);
+  return ft_strjoin_f(ft_strjoin_f(ft_dec_to_hex(g_A), ft_dec_to_hex(g_B), 3),
+        ft_strjoin_f(ft_dec_to_hex(g_C), ft_dec_to_hex(g_D), 3), 3);
 }
 
 void md5(t_args *args)
 {
   int i;
+  char *output;
 
   i = 0;
   while (args->inputs && args->inputs[i])
@@ -343,7 +352,14 @@ void md5(t_args *args)
     g_B = g_OI_B;
     g_C = g_OI_C;
     g_D = g_OI_D;
-    md5_transform(args->inputs[i]);
+    g_BL_A = g_OI_A;
+    g_BL_B = g_OI_B;
+    g_BL_C = g_OI_C;
+    g_BL_D = g_OI_D;
+    output = md5_transform(args->inputs[i]);
+    if (!(args->outputs = add_end_ds(args->outputs, output)))
+      ft_malloc_error();
+    free(output);
     i++;
   }
 }

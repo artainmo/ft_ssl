@@ -11,13 +11,19 @@ typedef struct s_arguments
   int p; //1 for flag being present and 0 for not being present
   int q;
   int r;
-  int s;
+  int s_;
   char **inputs;
+  char **s; //Equals "1" if input at same index comes from -s flag
+  char **file; //Equals "1" if input at same index comes from file
+  char **fileName; //Equals filename if input at same index comes from file
+  //If input neither comes from -s nor file we know it comes from stdin
+  char **outputs;
 } t_args;
 
 void parsing(t_args *args, int argc, char **argv);
 void visualize_args(t_args *args);
 void md5(t_args *args);
 void sha256(t_args *args);
+void display(t_args *args);
 
 #endif
