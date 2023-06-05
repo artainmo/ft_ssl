@@ -86,6 +86,6 @@ echo '> ./../ft_ssl sha256 test.sh'
 echo '> openssl sha256 test.sh'
 openssl sha256 test.sh
 echo ""
-echo './../ft_ssl sha256 no'
+echo '> ./../ft_ssl sha256 no'
 ./../ft_ssl sha256 no
 echo ""
