@@ -69,8 +69,6 @@ static char *file_content(char *file, t_args *args)
 				ft_errno();
 			if (!(result = ft_strjoin_f(result, line, 3)))
 				ft_malloc_error();
-      if (!(result = ft_strjoin_f(result, "\n", 1))) //When comparing with functional algorithm, a \n exists at end of input, knowing the get_next_line I use removes the \n, I added it back.
-        ft_malloc_error();
 		}
 		close(fd);
 	}
@@ -96,12 +94,11 @@ static void take_piped_stdin_input(t_args *args)
   {
     while ((ret = get_next_line(0, &line)))
 		{
+      // printf("%d\n%s\n", ret, line);
 			if (ret == -1)
 				ft_errno();
 			if (!(result = ft_strjoin_f(result, line, 3)))
 				ft_malloc_error();
-      if (!(result = ft_strjoin_f(result, "\n", 1))) //When comparing with functional algorithm, a \n exists at end of input, knowing the get_next_line I use removes the \n, I added it back.
-        ft_malloc_error();
 		}
     if (result == NULL)
       result = ft_strdup("");

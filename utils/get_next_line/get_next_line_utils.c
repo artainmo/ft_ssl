@@ -36,7 +36,7 @@ char	*ft_strjoin_m(char *s1, char *buf)
 	l = 0;
 	while (s1 && s1[i])
 		i++;
-	while (buf[l] && buf[l] != '\n')
+	while (buf[l] && buf[l-1] != '\n') //Also take the \n
 		l++;
 	if (!(ret = malloc(i + l + 1)))
 		return (0);
@@ -45,7 +45,7 @@ char	*ft_strjoin_m(char *s1, char *buf)
 	while (s1 && s1[l])
 		ret[i++] = s1[l++];
 	l = 0;
-	while (buf[l] && buf[l] != '\n')
+	while (buf[l] && buf[l-1] != '\n') //Also take the \n
 		ret[i++] = buf[l++];
 	ret[i] = '\0';
 	free(s1);

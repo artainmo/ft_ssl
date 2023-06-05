@@ -11,7 +11,7 @@ char *from_file(t_args *args, int i)
         1);
   } else {
     res = ft_strjoin_f(
-        ft_strjoin("MD5 (", args->fileName[i]),
+        ft_strjoin(args->algo == 5 ? "MD5 (": "SHA256 (", args->fileName[i]),
         ft_strjoin_f(") = ", args->outputs[i], 2),
         3);
   }
@@ -21,8 +21,10 @@ char *from_file(t_args *args, int i)
 char *file_error(t_args *args, int i)
 {
   return ft_strjoin_f(
-        ft_strjoin("ft_ssl: md5: ", args->fileName[i]),
-        ": No such file or directory", 1);
+          ft_strjoin(
+            ft_strjoin("ft_ssl: ", args->algo == 5 ? "md5: ": "sha256: "),
+            args->fileName[i]),
+          ": No such file or directory", 1);
 }
 
 char *from_string(t_args *args, int i)
@@ -36,7 +38,7 @@ char *from_string(t_args *args, int i)
         3);
   } else {
     res = ft_strjoin_f(
-        ft_strjoin("MD5 (\"", args->inputs[i]),
+        ft_strjoin(args->algo == 5 ? "MD5 (\"": "SHA256 (\"", args->inputs[i]),
         ft_strjoin_f("\") = ", args->outputs[i], 2),
         3);
   }

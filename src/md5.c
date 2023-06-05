@@ -1,18 +1,18 @@
 #include "../ft_ssl.h"
 
 //init 32bits initialization vectors
-const uint32_t g_OI_A = 0x67452301; //OI stands for original initialization vector ...A/B/C/D
-const uint32_t g_OI_B = 0xEFCDAB89;
-const uint32_t g_OI_C = 0x98BADCFE;
-const uint32_t g_OI_D = 0x10325476;
-uint32_t g_BL_A; //BL stands for blocks because those are used in calculations between blocks
-uint32_t g_BL_B;
-uint32_t g_BL_C;
-uint32_t g_BL_D;
-uint32_t g_A;
-uint32_t g_B;
-uint32_t g_C;
-uint32_t g_D;
+static const uint32_t g_OI_A = 0x67452301; //OI stands for original initialization vector ...A/B/C/D
+static const uint32_t g_OI_B = 0xEFCDAB89;
+static const uint32_t g_OI_C = 0x98BADCFE;
+static const uint32_t g_OI_D = 0x10325476;
+static uint32_t g_BL_A; //BL stands for blocks because those are used in calculations between blocks
+static uint32_t g_BL_B;
+static uint32_t g_BL_C;
+static uint32_t g_BL_D;
+static uint32_t g_A;
+static uint32_t g_B;
+static uint32_t g_C;
+static uint32_t g_D;
 
 //init of constant K values
 const uint32_t g_K[4][16] = {
@@ -38,7 +38,7 @@ static uint32_t I(uint32_t X, uint32_t Y, uint32_t Z) { return Y ^ (X | (~Z)); }
 
 //Modular addition
 const unsigned long g_Z = 0x100000000;
-static int modular_addition(unsigned long X, unsigned long Y)
+int modular_addition(unsigned long X, unsigned long Y)
 {
   return (X + Y) % g_Z;
 }
@@ -76,7 +76,8 @@ const int g_S[4][16] = {
 //   ft_printf("\n");
 // }
 
-static uint32_t binaryStringToInt(const char* binaryString) {
+uint32_t binaryStringToInt(const char *binaryString)
+{
     uint32_t result = 0;
     int len = ft_strlen(binaryString);
 
@@ -87,7 +88,7 @@ static uint32_t binaryStringToInt(const char* binaryString) {
     return result;
 }
 
-static char *stringToBinary(char *s, int length)
+char *stringToBinary(char *s, int length)
 {
   char *res;
   int counter = 0;
@@ -103,7 +104,7 @@ static char *stringToBinary(char *s, int length)
   return res;
 }
 
-static uint32_t rotate_left(uint32_t x, uint32_t n) { return (x << n) | (x >> (32 - n)); }
+uint32_t rotate_left(uint32_t x, uint32_t n) { return (x << n) | (x >> (32 - n)); }
 
 // static char *leftShift(char *binaryString, int shift)
 // {
@@ -181,7 +182,7 @@ static void operation(uint32_t M, int round_, int operation_)//, int block_)
   // if (block_ == 2) { exit(0); }
 }
 
-static char *reorder4Bytes_little_endian(char *s) //Little and big endian are two ways of storing multibyte data-types ( int, float, etc). In little endian machines, last byte of binary representation of the multibyte data-type is stored first. (https://www.geeksforgeeks.org/little-and-big-endian-mystery/)
+char *reorder4Bytes_little_endian(char *s) //Little and big endian are two ways of storing multibyte data-types ( int, float, etc). In little endian machines, last byte of binary representation of the multibyte data-type is stored first. (https://www.geeksforgeeks.org/little-and-big-endian-mystery/)
 {
   char *firstByte;
   char *secondByte;
@@ -203,7 +204,7 @@ static char *reorder4Bytes_little_endian(char *s) //Little and big endian are tw
   return ft_strjoin_f(res, firstByte, 3);
 }
 
-static uint32_t reorder4Bytes_little_endian2(uint32_t num)
+uint32_t reorder4Bytes_little_endian2(uint32_t num)
 {
   char *tmp;
   uint32_t res;
@@ -215,7 +216,7 @@ static uint32_t reorder4Bytes_little_endian2(uint32_t num)
   return res;
 }
 
-static void freeBlocks(uint32_t **M, int _512bit_messages)
+void freeBlocks(uint32_t **M, int _512bit_messages)
 {
   for (int i = 0; i < _512bit_messages; i++) {
     free(M[i]);
@@ -249,7 +250,28 @@ static uint32_t **toBlocks(char *message, int _512bit_messages)
   return M;
 }
 
-static char *padding(int padding_bits, char value)
+char *reverse_bits_padding(char *s)
+{
+  char *active;
+  int ia = 0;
+  char *empty;
+  int ie = 0;
+
+  if (!(active = malloc(sizeof(uint64_t))))
+    ft_malloc_error();
+  if (!(empty = malloc(sizeof(uint64_t))))
+    ft_malloc_error();
+  for (int i = 0; i < 64/8; i++) {
+    if (s[i] != 0) {
+      active[ia++] = s[i];
+    } else {
+      empty[ie++] = s[i];
+    }
+  }
+  return ft_strjoin_len_f(empty, ie, ft_strrev(active, ia), ia, 3);
+}
+
+char *padding(int padding_bits, char value)
 {
   char *res;
 
@@ -261,27 +283,6 @@ static char *padding(int padding_bits, char value)
   res[padding_bits / 8] = '\0';
   return res;
 }
-
-// static char *reverse_bits_padding(char *s)
-// {
-//   char *active;
-//   int ia = 0;
-//   char *empty;
-//   int ie = 0;
-//
-//   if (!(active = malloc(sizeof(uint64_t))))
-//     ft_malloc_error();
-//   if (!(empty = malloc(sizeof(uint64_t))))
-//     ft_malloc_error();
-//   for (int i = 0; i < 64/8; i++) {
-//     if (s[i] != 0) {
-//       active[ia++] = s[i];
-//     } else {
-//       empty[ie++] = s[i];
-//     }
-//   }
-//   return ft_strjoin_len_f(empty, ie, active, ia, 3);
-// }
 
 static char *md5_transform(char *input)
 {
