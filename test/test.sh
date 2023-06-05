@@ -4,6 +4,9 @@ echo ""
 echo '> ./../ft_ssl foobar'
 ./../ft_ssl foobar
 echo ""
+echo ""
+echo ""
+echo ""
 echo '> echo "42 is nice" | ./../ft_ssl md5'
 echo "42 is nice" | ./../ft_ssl md5
 echo '> echo "42 is nice" | openssl md5'
@@ -68,4 +71,21 @@ echo '> ./../ft_ssl md5 test.sh'
 ./../ft_ssl md5 test.sh
 echo '> openssl md5 test.sh'
 openssl md5 test.sh
+echo ""
+echo ""
+echo ""
+echo ""
+echo '> ./../ft_ssl sha256 -s "42 is nice"'
+./../ft_ssl sha256 -s "42 is nice"
+echo ""
+echo '> ./../ft_ssl sha256 -q website'
+./../ft_ssl sha256 -q website
+echo ""
+echo '> ./../ft_ssl sha256 test.sh'
+./../ft_ssl sha256 test.sh
+echo '> openssl sha256 test.sh'
+openssl sha256 test.sh
+echo ""
+echo './../ft_ssl sha256 no'
+./../ft_ssl sha256 no
 echo ""
