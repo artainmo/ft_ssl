@@ -1,8 +1,11 @@
 echo '> ./../ft_ssl'
 ./../ft_ssl
 echo ""
-echo '> ./../ft_ssl foobar'
-./../ft_ssl foobar
+echo '> ./../ft_ssl barfoo fefe'
+./../ft_ssl barfoo fefe
+echo ""
+echo '> ./../ft_ssl md5 -s'
+./../ft_ssl md5 -s
 echo ""
 echo ""
 echo ""
@@ -88,4 +91,6 @@ openssl sha256 test.sh
 echo ""
 echo '> ./../ft_ssl sha256 no'
 ./../ft_ssl sha256 no
+echo ""
+echo 'Verify manually:\necho -n "42 is nice" | ./../ft_ssl md5\necho -n "42 is nice" | openssl md5'
 echo ""
