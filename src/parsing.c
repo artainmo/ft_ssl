@@ -156,6 +156,7 @@ void parsing(t_args *args, int argc, char **argv)
     }
 		i++;
 	}
+  if (!stdin_input_exists(args)) take_piped_stdin_input(args); //Sometimes the fstat function does not work correctly and thus it is better to recheck
   if (stdin_input_exists(args) && !args->p && file_input_exists(args))
   {
     if (!(args->inputs = remove_begin_ds(args->inputs)) ||
