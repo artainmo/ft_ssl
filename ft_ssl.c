@@ -17,6 +17,7 @@ void init_struct(t_args *args)
 int main(int argc, char **argv)
 {
 	t_args args;
+	void (*fp[7]) (t_args *args) = {0, 0, 0, 0, 0, md5, sha256};
 
 	if (argc < 2)
 	{
@@ -36,10 +37,11 @@ int main(int argc, char **argv)
 	init_struct(&args);
 	parsing(&args, argc, argv);
 	// visualize_args(&args);
-	if (args.algo == 5)
-		md5(&args);
-	else
-		sha256(&args);
+	// if (args.algo == 5)
+	// 	md5(&args);
+	// else
+	// 	sha256(&args);
+	(*fp[ft_atoi(ft_substr(argv[1], ft_strlen(argv[1])-1, ft_strlen(argv[1])))])(&args);
 	display(&args);
 	free_ds(args.inputs);
 	free_ds(args.s);
